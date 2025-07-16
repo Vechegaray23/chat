@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Survey",
+  "type": "object",
+  "required": ["title", "questions"],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "text"],
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"type": "string", "enum": ["single_choice", "multiple_choice", "text"]},
+          "text": {"type": "string"},
+          "options": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}
