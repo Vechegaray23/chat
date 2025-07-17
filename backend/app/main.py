@@ -32,7 +32,10 @@ for parent in [_current.parent, *_current.parents]:
         SCHEMA_PATH = candidate
         break
 else:  # pragma: no cover - guard against missing schema during runtime
-    fallback = Path("/survey.schema.json")
+    # When running inside Docker ``survey.schema.json`` is copied to
+    # ``/app/survey.schema.json``. Check that location before raising an error
+    # to handle cases where the dynamic search above fails.
+    fallback = Path("/app/survey.schema.json")    
     if fallback.is_file():
         SCHEMA_PATH = fallback
     else:
