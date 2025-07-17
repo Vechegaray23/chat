@@ -1,8 +1,8 @@
 describe('Survey upload', () => {
   it('uploads valid survey', () => {
     cy.visit('/')
-    const file = { contents: '{"title":"A","questions":[{"id":"q1","type":"text","text":"ok"}]}', fileName: 'survey.json', mimeType: 'application/json' }    
-    cy.get('input[type=file]').selectFile(file)
+    cy.get('input[type=file]').selectFile('cypress/fixtures/valid_survey.json')
+
     cy.contains('Upload').click()
     cy.contains('Link').should('exist')
   })
@@ -10,8 +10,8 @@ describe('Survey upload', () => {
   it('shows error on invalid survey', () => {
     cy.visit('/')
     const file = { contents: '{"title":"bad"}', fileName: 'bad.json', mimeType: 'application/json' }
-    cy.get('input[type=file]').selectFile(file)
+    cy.get('input[type=file]').selectFile('cypress/fixtures/invalid_survey.json')
     cy.contains('Upload').click()
-    cy.contains('error', { matchCase: false })
+    cy.contains('required', { matchCase: false })
   })
 })
