@@ -10,6 +10,6 @@ describe('Survey upload', () => {
     cy.visit('/')
     cy.get('input[type=file]').selectFile('cypress/fixtures/invalid_survey.json')
     cy.contains('Upload').click()
-    cy.contains('error', { matchCase: false })
+    cy.contains('required', { matchCase: false })
   })
 })
