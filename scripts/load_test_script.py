@@ -1,6 +1,7 @@
 import asyncio
 import statistics
 import time
+import sys
 import websockets
 
 URL = 'ws://localhost:8000/stt-stream?survey_id=test&token=tok&question_id=q1&role=user'
@@ -18,6 +19,8 @@ async def main():
     await asyncio.gather(*(run_session(latencies) for _ in range(15)))
     p95 = statistics.quantiles(latencies, n=20)[18]
     print(f'p95 latency: {p95:.1f} ms')
+    if p95 > 300:
+        sys.exit(1)
 
 if __name__ == '__main__':
     asyncio.run(main())
