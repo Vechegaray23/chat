@@ -3,6 +3,7 @@ import io
 import uuid
 import importlib
 import sqlite3
+from pathlib import Path
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 DATABASE_URL = os.getenv("DATABASE_URL", ":memory:")
@@ -15,15 +16,8 @@ router = APIRouter()
 
 MAX_CHUNK_BYTES = 64000  # approx 2s of 16kHz 16bit audio
 
-
-def get_supabase_client():
-    try:
-        supabase_mod = importlib.import_module("supabase")
-    except ModuleNotFoundError as e:  # pragma: no cover - handled in tests via mock
-        raise RuntimeError("supabase module not installed") from e
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_KEY")
-    return supabase_mod.create_client(url, key)
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "uploads"))
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def transcribe_audio(data: bytes):
@@ -43,8 +37,6 @@ def transcribe_audio(data: bytes):
 @router.websocket("/stt-stream")
 async def stt_stream(ws: WebSocket, survey_id: str, token: str, question_id: str, role: str):
     await ws.accept()
-    supabase = get_supabase_client()
-    bucket = os.getenv("SUPABASE_BUCKET", "audio")
 
     while True:
         try:
@@ -57,9 +49,10 @@ async def stt_stream(ws: WebSocket, survey_id: str, token: str, question_id: str
             break
 
         audio_name = f"{uuid.uuid4()}.wav"
-        supabase.storage.from_(bucket).upload(audio_name, data)
-        signed = supabase.storage.from_(bucket).create_signed_url(audio_name, 604800)
-        audio_url = signed["signedURL"] if isinstance(signed, dict) else signed
+        path = UPLOAD_DIR / audio_name
+        with path.open("wb") as f:
+            f.write(data)
+        audio_url = str(path)
 
         transcript, confidence = transcribe_audio(data)
 

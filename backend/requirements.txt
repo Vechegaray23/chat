@@ -4,9 +4,7 @@ sqlalchemy
 jsonschema
 httpx
 pytest
-psycopg2-binary
 python-multipart
 openai>=1.15.0
-supabase-py>=2.0.0
 websockets
 

@@ -5,35 +5,15 @@ from app import stt_stream
 
 client = TestClient(app)
 
-class DummyStorage:
-    def __init__(self):
-        self.uploaded = {}
-    def upload(self, name, data):
-        self.uploaded[name] = data
-    def create_signed_url(self, name, _):
-        return {"signedURL": f"http://example.com/{name}"}
-
-class DummyBucket:
-    def __init__(self):
-        self.uploaded = {}
-    def from_(self, bucket):
-        return self
-    def upload(self, name, data):
-        self.uploaded[name] = data
-    def create_signed_url(self, name, ttl):
-        return {"signedURL": f"http://example.com/{name}"}
-
-class DummySupabase:
-    def __init__(self):
-        self.storage = DummyBucket()
-
 
 def test_stt_stream_inserts_and_returns(tmp_path, monkeypatch):
     # setup in-memory sqlite
     stt_stream.engine = sqlite3.connect(':memory:', check_same_thread=False)
-    stt_stream.engine.execute("CREATE TABLE turns (survey_id TEXT, token TEXT, question_id TEXT, role TEXT, audio_url TEXT, transcript TEXT, timestamp TEXT)")
+    stt_stream.engine.execute(
+        "CREATE TABLE turns (survey_id TEXT, token TEXT, question_id TEXT, role TEXT, audio_url TEXT, transcript TEXT, timestamp TEXT)"
+    )
 
-    monkeypatch.setattr(stt_stream, 'get_supabase_client', lambda: DummySupabase())
+    stt_stream.UPLOAD_DIR = tmp_path
     monkeypatch.setattr(stt_stream, 'transcribe_audio', lambda data: ("hi", 0.9))
 
     with client.websocket_connect("/stt-stream?survey_id=s1&token=t1&question_id=q1&role=user") as ws:
