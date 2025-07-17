@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from jsonschema import validate, ValidationError
 import json
 import uuid
-import os
+from pathlib import Path
 # The original implementation used SQLAlchemy for persistence. However the test
 # environment does not provide the required dependency, so we use a very
 # lightweight in-memory store to keep launched surveys. This is sufficient for
@@ -21,10 +21,10 @@ app.add_middleware(
 )
 
 # Locate the schema file relative to the repository root. ``__file__`` may
-# resolve to ``backend/app/main.py`` even when imported via a symlink. Moving two
-# directories up points to the repository root where ``survey.schema.json``
-# resides.
-SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "survey.schema.json")
+# resolve to ``backend/app/main.py`` or ``/app/app/main.py`` when packaged in
+# Docker. Using ``Path.resolve()`` lets us consistently access the repository or
+# container root by stepping two directories up from this file.
+SCHEMA_PATH = Path(__file__).resolve().parents[2] / "survey.schema.json"
 with open(SCHEMA_PATH) as f:
     SURVEY_SCHEMA = json.load(f)
 
