@@ -12,8 +12,11 @@ services:
     depends_on:
       - db
   frontend:
-    build: ./frontend
-    ports:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8000    
+      ports:
       - '5173:5173'
     depends_on:
       - backend

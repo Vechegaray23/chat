@@ -1,5 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+
 from jsonschema import validate, ValidationError
 import json
 import uuid
@@ -20,6 +22,12 @@ surveys_table = Table(
 metadata.create_all(engine)
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "..", "survey.schema.json")
 with open(SCHEMA_PATH) as f:
