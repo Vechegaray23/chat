@@ -1,8 +1,7 @@
 # Survey Launcher
 
 This project contains a FastAPI backend and a React frontend for uploading and launching surveys.
-Backend dependencies are listed in `backend/requirements.txt`. A Postgres driver
-(for example `psycopg2-binary`) is required when using a Postgres database.
+Backend dependencies are listed in `backend/requirements.txt`. If you use Postgres, install a compatible driver such as `psycopg2-binary` separately.
 
 
 ## Development

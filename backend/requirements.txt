@@ -4,5 +4,4 @@ sqlalchemy
 jsonschema
 httpx
 pytest
-psycopg2-binary
 python-multipart
