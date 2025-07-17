@@ -21,7 +21,7 @@ metadata.create_all(engine)
 
 app = FastAPI()
 
-SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "survey.schema.json")
+SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "..", "survey.schema.json")
 with open(SCHEMA_PATH) as f:
     SURVEY_SCHEMA = json.load(f)
 
