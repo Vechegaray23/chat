@@ -10,4 +10,17 @@ Use Docker Compose to start all services:
 docker-compose up
 ```
 
+### Infrastructure as Code
+
+Terraform configuration is provided in the `infra` directory. It replicates the
+Docker Compose setup using the Docker provider.
+
+To provision the environment with Terraform:
+
+```bash
+cd infra
+terraform init
+terraform apply
+```
+
 The backend exposes `POST /launch` which accepts a JSON survey file and stores it in Postgres.
