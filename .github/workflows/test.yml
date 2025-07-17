@@ -26,9 +26,9 @@ jobs:
           node-version: '18'
       - run: npm install
         working-directory: frontend
-      - run: docker-compose up -d
+      - run: docker compose up -d
       - run: npx wait-on http://localhost:5173
       - run: npm test
         working-directory: frontend
-      - run: docker-compose down
+      - run: docker compose down
         if: always()
