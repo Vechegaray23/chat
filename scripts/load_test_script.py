@@ -12,10 +12,17 @@ URL = 'ws://localhost:8000/stt-stream?survey_id=test&token=tok&question_id=q1&ro
 AUDIO_CHUNK = b'0' * 32000
 
 async def run_session(latencies):
-    async with websockets.connect(URL) as ws:
-        start = time.perf_counter()
-        await ws.send(AUDIO_CHUNK)
-        await ws.recv()
+    start = time.perf_counter()
+    try:
+        async with websockets.connect(URL) as ws:
+            await ws.send(AUDIO_CHUNK)
+            await ws.recv()
+    except websockets.exceptions.ConnectionClosedError:
+        # The server closed the connection without a proper close frame
+        # which previously caused this script to crash. We record the
+        # latency observed so far and continue.
+        pass
+    finally:
         latencies.append((time.perf_counter() - start) * 1000)
 
 async def main():
