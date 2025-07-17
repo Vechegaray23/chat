@@ -50,3 +50,10 @@ npm test
 ```
 
 These commands mirror the steps defined in the CI workflow.
+
+To run the WebSocket load test locally install the `websockets` package and execute:
+
+```bash
+pip install websockets
+python scripts/load_test_script.py
+```

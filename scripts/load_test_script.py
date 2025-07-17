@@ -2,7 +2,11 @@ import asyncio
 import statistics
 import time
 import sys
-import websockets
+try:
+    import websockets
+except ModuleNotFoundError:  # pragma: no cover - environment may lack dependency
+    print('websockets package not installed', file=sys.stderr)
+    sys.exit(1)
 
 URL = 'ws://localhost:8000/stt-stream?survey_id=test&token=tok&question_id=q1&role=user'
 AUDIO_CHUNK = b'0' * 32000

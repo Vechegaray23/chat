@@ -26,6 +26,10 @@ jobs:
           node-version: '18'
       - run: npm install
         working-directory: frontend
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install websockets
       - run: docker compose up -d
       - run: npx wait-on http://localhost:5173
       - run: npm test
