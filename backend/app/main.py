@@ -32,8 +32,11 @@ for parent in [_current.parent, *_current.parents]:
         SCHEMA_PATH = candidate
         break
 else:  # pragma: no cover - guard against missing schema during runtime
-    raise FileNotFoundError("survey.schema.json not found")
-
+    fallback = Path("/survey.schema.json")
+    if fallback.is_file():
+        SCHEMA_PATH = fallback
+    else:
+        raise FileNotFoundError("survey.schema.json not found")
 with open(SCHEMA_PATH) as f:
     SURVEY_SCHEMA = json.load(f)
 
