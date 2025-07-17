@@ -1,5 +1,33 @@
-from . import UploadFile, HTTPException
+from . import UploadFile, HTTPException, WebSocket
 import asyncio
+from urllib.parse import urlparse, parse_qs
+
+
+class _WSSession:
+    def __init__(self, handler, params):
+        self.ws = WebSocket()
+        self.handler = handler
+        self.params = params
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.task = self.loop.create_task(self.handler(self.ws, **self.params))
+
+    def send_bytes(self, data: bytes):
+        self.ws._recv.append(data)
+        self.loop.run_until_complete(asyncio.sleep(0))
+
+    def receive_json(self):
+        while not self.ws._send:
+            self.loop.run_until_complete(asyncio.sleep(0))
+        return self.ws._send.pop(0)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.ws._recv.append(None)
+        self.loop.run_until_complete(self.task)
+        self.loop.close()
 
 class Response:
     def __init__(self, status_code, data):
@@ -25,3 +53,11 @@ class TestClient:
             return Response(200, data)
         except HTTPException as e:
             return Response(e.status_code, {"detail": e.detail})
+
+    def websocket_connect(self, path):
+        url = urlparse(path)
+        handler = self.app.routes.get(("websocket", url.path))
+        if handler is None:
+            raise Exception("Route not found")
+        params = {k: v[0] for k, v in parse_qs(url.query).items()}
+        return _WSSession(handler, params)

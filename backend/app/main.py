@@ -2,6 +2,8 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from .stt_stream import router as stt_router
+
 from jsonschema import validate, ValidationError
 import json
 import uuid
@@ -19,6 +21,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(stt_router)
 
 # Locate ``survey.schema.json``. When running inside Docker ``__file__`` will
 # be ``/app/app/main.py`` while during development it may be

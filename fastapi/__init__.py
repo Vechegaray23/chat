@@ -25,6 +25,43 @@ class FastAPI:
             return func
         return decorator
 
+    def websocket(self, path):
+        def decorator(func):
+            self.routes[("websocket", path)] = func
+            return func
+        return decorator
+
+    def include_router(self, router):
+        self.routes.update(router.routes)
+
+class APIRouter:
+    def __init__(self):
+        self.routes = {}
+    def websocket(self, path):
+        def decorator(func):
+            self.routes[("websocket", path)] = func
+            return func
+        return decorator
+
+class WebSocketDisconnect(Exception):
+    pass
+
+class WebSocket:
+    def __init__(self):
+        self._recv = []
+        self._send = []
+    async def accept(self):
+        pass
+    async def receive_bytes(self):
+        if not self._recv:
+            raise WebSocketDisconnect()
+        data = self._recv.pop(0)
+        if data is None:
+            raise WebSocketDisconnect()
+        return data
+    async def send_json(self, data):
+        self._send.append(data)
+
 from .responses import JSONResponse
 from .testclient import TestClient
 from .middleware import CORSMiddleware
