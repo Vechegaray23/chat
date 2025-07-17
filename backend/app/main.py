@@ -20,11 +20,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Locate the schema file relative to the repository root. ``__file__`` may
-# resolve to ``backend/app/main.py`` or ``/app/app/main.py`` when packaged in
-# Docker. Using ``Path.resolve()`` lets us consistently access the repository or
-# container root by stepping two directories up from this file.
-SCHEMA_PATH = Path(__file__).resolve().parents[2] / "survey.schema.json"
+# Locate ``survey.schema.json``. When running inside Docker ``__file__`` will
+# be ``/app/app/main.py`` while during development it may be
+# ``backend/app/main.py``. Instead of relying on a fixed number of parent
+# directories, walk up the tree until the file is found so both environments
+# work the same.
+_current = Path(__file__).resolve()
+for parent in [_current.parent, *_current.parents]:
+    candidate = parent / "survey.schema.json"
+    if candidate.is_file():
+        SCHEMA_PATH = candidate
+        break
+else:  # pragma: no cover - guard against missing schema during runtime
+    raise FileNotFoundError("survey.schema.json not found")
+
 with open(SCHEMA_PATH) as f:
     SURVEY_SCHEMA = json.load(f)
 
