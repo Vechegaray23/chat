@@ -2,7 +2,7 @@ import json
 from jsonschema import validate, ValidationError
 from pathlib import Path
 
-SCHEMA_PATH = Path(__file__).resolve().parents[2] / 'survey.schema.json'
+SCHEMA_PATH = Path(__file__).resolve().parents[3] / 'survey.schema.json'
 with open(SCHEMA_PATH) as f:
     SCHEMA = json.load(f)
 

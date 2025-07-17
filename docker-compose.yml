@@ -1,8 +1,9 @@
 version: '3.8'
 services:
   backend:
-    build: ./backend
-    volumes:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile    volumes:
       - ./survey.schema.json:/app/survey.schema.json
     ports:
       - '8000:8000'

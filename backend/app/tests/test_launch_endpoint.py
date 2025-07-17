@@ -6,7 +6,7 @@ from backend.app.main import app
 
 client = TestClient(app)
 
-SCHEMA_PATH = Path(__file__).resolve().parents[2] / 'survey.schema.json'
+SCHEMA_PATH = Path(__file__).resolve().parents[3] / 'survey.schema.json'
 
 with open(SCHEMA_PATH) as f:
     VALID_SURVEY = json.load(f)
