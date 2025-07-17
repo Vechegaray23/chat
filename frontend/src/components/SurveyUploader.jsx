@@ -4,13 +4,16 @@ export default function SurveyUploader() {
   const [error, setError] = useState(null)
   const [link, setLink] = useState(null)
 
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://backend:8000'
+
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
     setLink(null)
     const formData = new FormData(e.target)
     try {
-      const res = await fetch('/launch', {
+      const res = await fetch(`${baseUrl}/launch`, {
         method: 'POST',
         body: formData
       })

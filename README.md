@@ -1,6 +1,9 @@
 # Survey Launcher
 
 This project contains a FastAPI backend and a React frontend for uploading and launching surveys.
+Backend dependencies are listed in `backend/requirements.txt`. A Postgres driver
+(for example `psycopg2-binary`) is required when using a Postgres database.
+
 
 ## Development
 
@@ -24,3 +27,19 @@ terraform apply
 ```
 
 The backend exposes `POST /launch` which accepts a JSON survey file and stores it in Postgres.
+
+### Testing
+
+Backend tests can be run with `pytest`:
+
+```bash
+pytest backend/app/tests
+```
+
+Frontend tests are executed from the `frontend` directory using npm:
+
+```bash
+npm test
+```
+
+These commands mirror the steps defined in the CI workflow.
