@@ -14,6 +14,9 @@ engine = sqlite3.connect(DATABASE_URL, check_same_thread=False)
 engine.execute(
     "CREATE TABLE IF NOT EXISTS turns (survey_id TEXT, token TEXT, question_id TEXT, role TEXT, audio_url TEXT, transcript TEXT, timestamp TEXT)"
 )
+engine.execute(
+    "CREATE TABLE IF NOT EXISTS consent (survey_id TEXT, timestamp TEXT)"
+)
 
 router = APIRouter()
 

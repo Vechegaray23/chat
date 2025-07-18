@@ -10,6 +10,15 @@ class UploadFile:
     async def read(self):
         return self.file.read()
 
+class Request:
+    def __init__(self, url: str):
+        self.url = type('URL', (), {'scheme': url.split(':')[0]})()
+
+class RedirectResponse:
+    def __init__(self, url: str):
+        self.status_code = 307
+        self.headers = {'Location': url}
+
 def File(*args, **kwargs):
     return None
 

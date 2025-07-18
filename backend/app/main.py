@@ -1,5 +1,6 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
+import os
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from .stt_stream import router as stt_router
@@ -15,12 +16,23 @@ from pathlib import Path
 from .storage import surveys_storage
 
 app = FastAPI()
+
+allowed = os.getenv("FRONTEND_DOMAIN")
+origins = [allowed] if allowed else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if os.getenv("FORCE_HTTPS") == "1":
+    @app.middleware("http")
+    async def https_redirect(request: Request, call_next):
+        if request.url.scheme != "https":
+            url = request.url.replace(scheme="https")
+            return RedirectResponse(url=str(url))
+        return await call_next(request)
 app.include_router(stt_router)
 
 # Locate ``survey.schema.json``. When running inside Docker ``__file__`` will
@@ -81,3 +93,18 @@ async def events_ws(ws: WebSocket, survey_id: str):
 async def get_transcript(survey_id: str, token: str):
     data = load_or_build_transcript(survey_id, token, stt_stream.engine)
     return JSONResponse(data)
+
+
+@app.post("/consent")
+async def register_consent(request: Request):
+    data = await request.json()
+    survey_id = data.get("survey_id")
+    if not survey_id:
+        raise HTTPException(status_code=400, detail="survey_id required")
+    cur = stt_stream.engine.cursor()
+    cur.execute(
+        "INSERT INTO consent (survey_id, timestamp) VALUES (?, CURRENT_TIMESTAMP)",
+        (survey_id,),
+    )
+    stt_stream.engine.commit()
+    return JSONResponse({"ok": True})

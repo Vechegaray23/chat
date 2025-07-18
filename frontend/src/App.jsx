@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ConsentModal from './components/ConsentModal'
 import SurveyUploader from './components/SurveyUploader'
 import LiveTranscript from './components/LiveTranscript'
 import DownloadTranscriptButton from './components/DownloadTranscriptButton'
@@ -8,6 +9,11 @@ import useSttStream from './hooks/useSttStream'
 export default function App() {
   const stt = useSttStream({ surveyId: 'demo', token: 'demo', questionId: 'q1', role: 'user' })
   const [completed, setCompleted] = useState(false)
+  const [consent, setConsent] = useState(false)
+
+  if (!consent) {
+    return <ConsentModal onAccept={() => setConsent(true)} />
+  }
 
   return (
     <div className="container mx-auto space-y-4">

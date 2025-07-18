@@ -1,0 +1,14 @@
+{
+  "title": "Chat Logs",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Errors",
+      "targets": [
+        {
+          "expr": "sum(rate({job='backend'} |= 'ERROR'[5m]))"
+        }
+      ]
+    }
+  ]
+}

@@ -18,3 +18,9 @@ services:
       - '5173:5173'
     depends_on:
       - backend
+  promtail:
+    image: grafana/promtail:2.9.2
+    volumes:
+      - ./promtail.yaml:/etc/promtail.yaml
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail.yaml
