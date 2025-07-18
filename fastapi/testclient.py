@@ -54,6 +54,38 @@ class TestClient:
         except HTTPException as e:
             return Response(e.status_code, {"detail": e.detail})
 
+    def get(self, path):
+        handler = None
+        params = {}
+        for (method, route_path), func in self.app.routes.items():
+            if method != "get":
+                continue
+            rp = route_path.strip("/").split("/")
+            pp = path.strip("/").split("/")
+            if len(rp) != len(pp):
+                continue
+            tmp_params = {}
+            match = True
+            for rseg, pseg in zip(rp, pp):
+                if rseg.startswith("{") and rseg.endswith("}"):
+                    tmp_params[rseg[1:-1]] = pseg
+                elif rseg != pseg:
+                    match = False
+                    break
+            if match:
+                handler = func
+                params = tmp_params
+                break
+        if handler is None:
+            raise Exception("Route not found")
+        try:
+            data = asyncio.run(handler(**params))
+            if hasattr(data, 'content'):
+                return Response(getattr(data, 'status_code', 200), data.content)
+            return Response(200, data)
+        except HTTPException as e:
+            return Response(e.status_code, {"detail": e.detail})
+
     def websocket_connect(self, path):
         url = urlparse(path)
         handler = self.app.routes.get(("websocket", url.path))

@@ -12,7 +12,7 @@ from pathlib import Path
 # environment does not provide the required dependency, so we use a very
 # lightweight in-memory store to keep launched surveys. This is sufficient for
 # the unit tests which only verify the response structure.
-surveys_storage = []
+from .storage import surveys_storage
 
 app = FastAPI()
 app.add_middleware(
@@ -66,3 +66,18 @@ async def launch_survey(file: UploadFile = File(...)):
     surveys_storage.append({"id": survey_id, "data": data})
 
     return JSONResponse({"survey_id": survey_id, "link": link})
+
+from fastapi import WebSocket
+from .flow_engine import load_or_build_transcript
+from . import events, stt_stream
+
+
+@app.websocket("/events/{survey_id}")
+async def events_ws(ws: WebSocket, survey_id: str):
+    await events.events_ws(ws, survey_id)
+
+
+@app.get("/transcript/{survey_id}/{token}")
+async def get_transcript(survey_id: str, token: str):
+    data = load_or_build_transcript(survey_id, token, stt_stream.engine)
+    return JSONResponse(data)

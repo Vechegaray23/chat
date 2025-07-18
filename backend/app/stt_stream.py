@@ -5,6 +5,9 @@ import importlib
 import sqlite3
 from pathlib import Path
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from . import events
+from .flow_engine import FlowEngine
+from .storage import surveys_storage
 
 DATABASE_URL = os.getenv("DATABASE_URL", ":memory:")
 engine = sqlite3.connect(DATABASE_URL, check_same_thread=False)
@@ -59,6 +62,8 @@ def transcribe_audio(data: bytes):
 @router.websocket("/stt-stream")
 async def stt_stream(ws: WebSocket, survey_id: str, token: str, question_id: str, role: str):
     await ws.accept()
+    await events.send_event(survey_id, {"type": "question_started", "question_id": question_id})
+    collected = ""
 
     while True:
         try:
@@ -78,6 +83,8 @@ async def stt_stream(ws: WebSocket, survey_id: str, token: str, question_id: str
 
         transcript, confidence = transcribe_audio(data)
 
+        collected += transcript
+
         cur = engine.cursor()
         cur.execute(
             "INSERT INTO turns (survey_id, token, question_id, role, audio_url, transcript, timestamp)"
@@ -87,3 +94,21 @@ async def stt_stream(ws: WebSocket, survey_id: str, token: str, question_id: str
         engine.commit()
 
         await ws.send_json({"transcript": transcript, "confidence": confidence})
+
+    await events.send_event(
+        survey_id,
+        {
+            "type": "question_answered",
+            "question_id": question_id,
+            "transcript": collected,
+        },
+    )
+
+    # determine if survey completed
+    survey = next((s for s in surveys_storage if s["id"] == survey_id), None)
+    if survey:
+        engine_flow = FlowEngine(survey["data"])
+        answers = {question_id: collected}
+        next_q = engine_flow.next_question(question_id, answers)
+        if not next_q:
+            await events.send_event(survey_id, {"type": "survey_completed"})

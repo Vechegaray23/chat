@@ -25,6 +25,12 @@ class FastAPI:
             return func
         return decorator
 
+    def get(self, path):
+        def decorator(func):
+            self.routes[("get", path)] = func
+            return func
+        return decorator
+
     def websocket(self, path):
         def decorator(func):
             self.routes[("websocket", path)] = func
