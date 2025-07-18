@@ -29,6 +29,9 @@ OPENAI_API_KEY=sk-your-openai-key
 - `VITE_API_URL` - base URL for the backend API. Defaults to `http://backend:8000` during container builds.
 - `UPLOAD_DIR` - directory where audio files are stored. Defaults to `uploads`.
 - `OPENAI_API_KEY` - key used to access OpenAI's transcription API. Defaults to `test`.
+  When left at the default value the backend does not contact the OpenAI service
+  and instead returns an empty transcript immediately. This keeps local tests and
+  the bundled load test fast even without network access.
 
 The OpenAI key is obtained from the [OpenAI dashboard](https://platform.openai.com/account/api-keys).
 
